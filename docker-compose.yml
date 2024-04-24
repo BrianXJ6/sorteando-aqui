@@ -14,6 +14,7 @@ services:
             - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
         environment:
             XDEBUG_MODE: '${XDEBUG_MODE:-off}'
+            SUPERVISOR_PHP_COMMAND: "/usr/bin/php -d variables_order=EGPCS /var/www/html/artisan octane:start --watch --server=swoole --host=0.0.0.0 --port=80"
         volumes:
             - '.:/var/www/html'
         networks:
