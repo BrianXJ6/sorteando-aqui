@@ -25,7 +25,6 @@ class User extends BaseAuthenticable implements MustVerifyEmail
      */
     protected $hidden = [
         'password',
-        'remember_token',
     ];
 
     /**
