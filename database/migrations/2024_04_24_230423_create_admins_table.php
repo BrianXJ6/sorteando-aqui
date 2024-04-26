@@ -15,15 +15,15 @@ return new class extends Migration
     {
         Schema::create('admins', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
+            $table->string('name', 100);
+            $table->string('email', 100)->unique();
             $table->string('password');
             $table->timestamps();
             $table->softDeletes();
         });
 
         Schema::create('admin_password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
+            $table->string('email', 100)->primary();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
         });
