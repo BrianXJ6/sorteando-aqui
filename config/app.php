@@ -46,7 +46,7 @@ return [
     | Application Protocol
     |--------------------------------------------------------------------------
     |
-    | Defines which protocol to use during requests
+    | Defines which protocol laravel will base on to resolve its routes
     | Options: "http" or "https"
     |
     */
