@@ -20,6 +20,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('user_password_reset_tokens', function (Blueprint $table) {
