@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\RateLimiter;
 
 class AppServiceProvider extends ServiceProvider
@@ -37,6 +38,9 @@ class AppServiceProvider extends ServiceProvider
         /** Rate limit config */
         $this->configRateLimiterForWeb();
         $this->configRateLimiterForApi();
+
+        // Password rules default
+        $this->configPasswordRule();
     }
 
     /**
@@ -64,6 +68,24 @@ class AppServiceProvider extends ServiceProvider
             return $request->user()
                 ? Limit::perMinute(200)->by($request->user()->getKey())
                 : Limit::perMinute(100)->by($request->ip());
+        });
+    }
+
+    /**
+     * Default settings for passwords in different types of environments.
+     *
+     * @return void
+     */
+    private function configPasswordRule(): void
+    {
+        Password::defaults(function () {
+            /** @var \Illuminate\Foundation\Application */
+            $app = $this->app;
+            $rule = Password::min(8);
+
+            return $app->isProduction()
+                        ? $rule->symbols()->mixedCase()->numbers()
+                        : $rule;
         });
     }
 }
