@@ -43,6 +43,40 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Application Protocol
+    |--------------------------------------------------------------------------
+    |
+    | Defines which protocol laravel will base on to resolve its routes
+    | Options: "http" or "https"
+    |
+    */
+
+    'protocol' => env('APP_PROTOCOL', 'http'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Application Domain
+    |--------------------------------------------------------------------------
+    |
+    | Defines which domain laravel will base on to resolve its routes
+    |
+    */
+
+    'domain' => env('APP_DOMAIN', 'localhost'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Application Port
+    |--------------------------------------------------------------------------
+    |
+    | Defines which port laravel will base on to resolve its routes
+    |
+    */
+
+    'port' => env('APP_PORT', 80),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application URL
     |--------------------------------------------------------------------------
     |
@@ -52,7 +86,7 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost'),
+    'url' => env('APP_URL', 'http://localhost:80'),
 
     /*
     |--------------------------------------------------------------------------

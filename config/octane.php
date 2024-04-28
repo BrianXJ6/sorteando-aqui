@@ -51,7 +51,7 @@ return [
     |
     */
 
-    'https' => env('OCTANE_HTTPS', false),
+    'https' => env('OCTANE_HTTPS', config('app.protocol') === 'https'),
 
     /*
     |--------------------------------------------------------------------------
@@ -220,5 +220,4 @@ return [
     */
 
     'max_execution_time' => 30,
-
 ];
