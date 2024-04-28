@@ -54,8 +54,14 @@ return [
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
+            'directory_separator' => '/'
         ],
 
+        's3-user-avatar' => [
+            'driver' => 'scoped',
+            'disk' => 's3',
+            'prefix' => 'users',
+        ],
     ],
 
     /*
