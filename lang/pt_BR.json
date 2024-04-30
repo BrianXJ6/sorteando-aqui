@@ -1,4 +1,5 @@
 {
+    "validator errors": "{1} Ops! Algum campo parecem estar incorreto. Por favor, verifique e tente novamente.|[2,*] Ops! Alguns campos parecem estar incorretos. Por favor, verifique e tente novamente.",
     "(and :count more error)": "Ops! Algum campo parecem estar incorreto. Por favor, verifique e tente novamente.",
     "(and :count more errors)": "Ops! Alguns campos parecem estar incorretos. Por favor, verifique e tente novamente.",
     "A fresh verification link has been sent to your email address.": "Um novo link de verificação foi enviado para seu e-mail",
