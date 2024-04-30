@@ -11,6 +11,7 @@
         "laravel/octane": "^2.3",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
+        "laravel/ui": "^4.5",
         "league/flysystem-aws-s3-v3": "^3.27",
         "league/flysystem-path-prefixing": "^3.23",
         "predis/predis": "^2.2",
