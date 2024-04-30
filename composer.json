@@ -13,7 +13,8 @@
         "laravel/tinker": "^2.9",
         "league/flysystem-aws-s3-v3": "^3.27",
         "league/flysystem-path-prefixing": "^3.23",
-        "predis/predis": "^2.2"
+        "predis/predis": "^2.2",
+        "spatie/laravel-data": "^4.5"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
