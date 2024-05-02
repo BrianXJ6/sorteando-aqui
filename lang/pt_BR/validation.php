@@ -169,6 +169,7 @@ return [
     */
 
     'attributes' => [
+        'option' => 'opção',
         'address'   => 'endereço',
         'age'       => 'idade',
         'body'      => 'conteúdo',

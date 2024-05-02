@@ -1,0 +1,64 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Enums\UserLoginFlow;
+use App\Services\UserAuthService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+use App\Http\Resources\UserAuthResource;
+use App\Http\Requests\SignInAuthUserRequest;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class UserAuthController extends Controller
+{
+    /**
+     * Create a new User Auth Controller instance
+     *
+     * @param \App\Services\UserAuthService $userAuthService
+     */
+    public function __construct(private UserAuthService $userAuthService)
+    {
+        //
+    }
+
+    /**
+     * Login flow from the WEB
+     *
+     * @param \App\Http\Requests\SignInAuthUserRequest $request
+     *
+     * @return \Illuminate\Http\Resources\Json\JsonResource
+     */
+    public function signInWeb(SignInAuthUserRequest $request): JsonResource
+    {
+        $user = DB::transaction(fn () => $this->userAuthService->signInWeb($request->getDTO()));
+
+        return UserAuthResource::make(['user' => $user, 'flow' => UserLoginFlow::WEB]);
+    }
+
+    /**
+     * Login flow from the API
+     *
+     * @param \App\Http\Requests\SignInAuthUserRequest $request
+     *
+     * @return \Illuminate\Http\Resources\Json\JsonResource
+     */
+    public function signInApi(SignInAuthUserRequest $request): JsonResource
+    {
+        $user = DB::transaction(fn () => $this->userAuthService->signInApi($request->getDTO()));
+
+        return UserAuthResource::make(['user' => $user, 'flow' => UserLoginFlow::API]);
+    }
+
+    /**
+     * Logout flow from the WEB
+     *
+     * @return JsonResponse
+     */
+    public function signOut(): JsonResponse
+    {
+        $this->userAuthService->signOut();
+
+        return new JsonResponse(status:JsonResponse::HTTP_NO_CONTENT);
+    }
+}

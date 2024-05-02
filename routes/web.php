@@ -1,7 +1,23 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserAuthController;
 
-Route::get('/', function () {
-    return view('welcome');
+/*
+|--------------------------------------------------------------------------
+| Action routes
+|--------------------------------------------------------------------------
+*/
+Route::prefix('actions/auth')->name('actions.auth.')->group(function () {
+    // Users routes
+    Route::prefix('users')->name('users.')->controller(UserAuthController::class)->group(function () {
+        // Guest
+        Route::middleware(['guest:user'])->group(function () {
+            Route::post('signin', 'signInWeb')->name('signin-web');
+        });
+        // Authenticated
+        Route::middleware(['auth:user'])->group(function () {
+            Route::post('signout', 'signOut')->name('signout-web');
+        });
+    });
 });
