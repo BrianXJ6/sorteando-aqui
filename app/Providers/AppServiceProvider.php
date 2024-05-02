@@ -9,6 +9,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -39,8 +40,11 @@ class AppServiceProvider extends ServiceProvider
         $this->configRateLimiterForWeb();
         $this->configRateLimiterForApi();
 
-        // Password rules default
+        /** Password rules default */
         $this->configPasswordRule();
+
+        /** Disable the wrapping of the resource */
+        JsonResource::withoutWrapping();
     }
 
     /**
