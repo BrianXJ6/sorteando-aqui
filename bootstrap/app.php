@@ -1,6 +1,8 @@
 <?php
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Foundation\Application;
+use App\Exceptions\ValidationException;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 
@@ -19,5 +21,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api('throttle:api');
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
-    })->create();
+        $exceptions->render(function (ValidationException $e) {
+            if (empty($e->validator->failed())) {
+                return new JsonResponse(['message' => $e->getMessage()], $e->status);
+            }
+        });
+    })
+    ->create();

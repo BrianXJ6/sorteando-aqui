@@ -22,8 +22,10 @@ class ValidationException extends BaseValidationException
             return $validator->getTranslator()->get('The given data was invalid.');
         }
 
-        $message = $validator->getTranslator()->choice('validator errors', count($messages));
+        if (empty($validator->failed())) {
+            return array_shift($messages);
+        }
 
-        return $message;
+        return $validator->getTranslator()->choice('validator errors', count($messages));
     }
 }
