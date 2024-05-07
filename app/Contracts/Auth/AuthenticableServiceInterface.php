@@ -2,6 +2,8 @@
 
 namespace App\Contracts\Auth;
 
+use App\Support\ORM\BaseAuthenticable;
+
 interface AuthenticableServiceInterface
 {
     /**
@@ -17,4 +19,14 @@ interface AuthenticableServiceInterface
      * @return void
      */
     public function revokeConfirmPassword(): void;
+
+    /**
+     * Callback to handle password recovery request process
+     *
+     * @param \App\Support\ORM\BaseAuthenticable $user
+     * @param string $token
+     *
+     * @return string
+     */
+    public function processPasswordRecovery(BaseAuthenticable $user, string $token): string;
 }

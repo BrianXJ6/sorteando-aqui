@@ -4,6 +4,7 @@ namespace App\Traits\Auth;
 
 use App\Support\ORM\BaseAuthenticable;
 use App\Exceptions\ValidationException;
+use Illuminate\Contracts\Auth\PasswordBroker;
 
 trait AuthenticableServiceTrait
 {
@@ -63,5 +64,32 @@ trait AuthenticableServiceTrait
     {
         $this->sessionManager->regenerate();
         $this->sessionManager->regenerateToken();
+    }
+
+    /**
+     * Handle common forgot password process for any type of authenticable user
+     *
+     * @param array $credentials
+     *
+     * @return string
+     *
+     * @throws \App\Exceptions\ValidationException
+     */
+    public function requestPasswordRecovery(array $credentials): string
+    {
+        $response = $this->passwordManager->broker()
+                    ->sendResetLink(
+                        $credentials,
+                        fn ($user, $token) => method_exists($this, 'processPasswordRecovery')
+                            ? $this->processPasswordRecovery($user, $token)
+                            : null
+                    );
+
+        throw_if(
+            ($response !== PasswordBroker::RESET_LINK_SENT),
+            ValidationException::withMessages([trans($response)])
+        );
+
+        return $response;
     }
 }

@@ -7,6 +7,7 @@ use App\Services\UserAuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\UserAuthResource;
+use App\Http\Requests\PasswordForgotRequest;
 use App\Http\Requests\SignInAuthUserRequest;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -60,5 +61,19 @@ class UserAuthController extends Controller
         $this->userAuthService->signOut();
 
         return new JsonResponse(status:JsonResponse::HTTP_NO_CONTENT);
+    }
+
+    /**
+     * First step for forgot password flow
+     *
+     * @param \App\Http\Requests\PasswordForgotRequest $request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function passwordForgotRequest(PasswordForgotRequest $request): JsonResponse
+    {
+        $response = DB::transaction(fn () => $this->userAuthService->requestPasswordRecovery($request->only('email')));
+
+        return new JsonResponse(['message' => trans($response)]);
     }
 }
