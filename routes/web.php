@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserAuthController;
 
+Route::get('/', fn () => 'Home Page')->name('home');
+
 /*
 |--------------------------------------------------------------------------
 | Action routes
