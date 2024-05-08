@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\User;
-use App\Data\SignInAuthUserData;
 use Illuminate\Auth\AuthManager;
 use App\Support\ORM\BaseAuthenticable;
 use Illuminate\Session\SessionManager;
@@ -30,42 +28,6 @@ class UserAuthService implements AuthenticableServiceInterface
     ) {
         $this->authManager->setDefaultDriver('user');
         $this->passwordManager->setDefaultDriver('users');
-    }
-
-    /**
-     * Login flow from the WEB
-     *
-     * @param \App\Data\SignInAuthUserData $dto
-     *
-     * @return \App\Models\User
-     */
-    public function signInWeb(SignInAuthUserData $dto): User
-    {
-        /** @var \App\Models\User */
-        $user = $this->signIn($dto->credentials());
-
-        if ($this->hasSession()) {
-            $this->sessionRegenerate();
-            $this->confirmPassword();
-        }
-
-        return $user;
-    }
-
-    /**
-     * Login flow from the API
-     *
-     * @param \App\Data\SignInAuthUserData $dto
-     *
-     * @return \App\Models\User
-     */
-    public function signInApi(SignInAuthUserData $dto): User
-    {
-        /** @var \App\Models\User */
-        $user = $this->signIn($dto->credentials());
-        $user->generateApiToken();
-
-        return $user;
     }
 
     /**

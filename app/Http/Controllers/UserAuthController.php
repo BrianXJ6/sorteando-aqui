@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\UserLoginFlow;
 use App\Services\UserAuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
-use App\Http\Resources\UserAuthResource;
+use App\Http\Resources\SignInResource;
 use App\Http\Requests\PasswordForgotRequest;
 use App\Http\Requests\SignInAuthUserRequest;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -26,35 +25,21 @@ class UserAuthController extends Controller
     }
 
     /**
-     * Login flow from the WEB
+     * Login flow
      *
      * @param \App\Http\Requests\SignInAuthUserRequest $request
      *
      * @return \Illuminate\Http\Resources\Json\JsonResource
      */
-    public function signInWeb(SignInAuthUserRequest $request): JsonResource
+    public function signIn(SignInAuthUserRequest $request): JsonResource
     {
-        $user = DB::transaction(fn () => $this->userAuthService->signInWeb($request->getDTO()));
+        $outputSignInDTO = DB::transaction(fn () => $this->userAuthService->signIn($request->getDTO()->credentials()));
 
-        return UserAuthResource::make(['user' => $user, 'flow' => UserLoginFlow::WEB]);
+        return SignInResource::make($outputSignInDTO);
     }
 
     /**
-     * Login flow from the API
-     *
-     * @param \App\Http\Requests\SignInAuthUserRequest $request
-     *
-     * @return \Illuminate\Http\Resources\Json\JsonResource
-     */
-    public function signInApi(SignInAuthUserRequest $request): JsonResource
-    {
-        $user = DB::transaction(fn () => $this->userAuthService->signInApi($request->getDTO()));
-
-        return UserAuthResource::make(['user' => $user, 'flow' => UserLoginFlow::API]);
-    }
-
-    /**
-     * Logout flow from the WEB
+     * Logout flow
      *
      * @return JsonResponse
      */
@@ -66,7 +51,7 @@ class UserAuthController extends Controller
     }
 
     /**
-     * First step for forgot password flow (request link)
+     * First step to password recovery (Request link)
      *
      * @param \App\Http\Requests\PasswordForgotRequest $request
      *
@@ -80,7 +65,7 @@ class UserAuthController extends Controller
     }
 
     /**
-     * Last step for forgot password flow (reset password)
+     * Last step to password recovery (reset password)
      *
      * @param \App\Http\Requests\PasswordForgotResetRequest $request
      *

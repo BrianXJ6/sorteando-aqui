@@ -35,6 +35,22 @@ abstract class BaseAuthenticable extends Authenticable
         return $this->token;
     }
 
+    /**
+     * Set timestamp value for last login
+     *
+     * @param boolean $autoSave
+     *
+     * @return void
+     */
+    public function setLastLogin(bool $autoSave = true): void
+    {
+        $this->forceFill(['last_login' => now()]);
+
+        if ($autoSave) {
+            $this->save();
+        }
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Notifications

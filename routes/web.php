@@ -15,7 +15,7 @@ Route::prefix('actions/auth')->name('actions.auth.')->group(function () {
     Route::prefix('users')->name('users.')->controller(UserAuthController::class)->group(function () {
         // Guest
         Route::middleware(['guest:user'])->group(function () {
-            Route::post('signin', 'signInWeb')->name('signin-web');
+            Route::post('signin', 'signIn')->name('signin');
             Route::prefix('password/forgot')->name('password.forgot')->group(function () {
                 Route::post('request', 'passwordForgotRequest')->name('request');
                 Route::post('reset', 'passwordForgotReset')->name('reset');
@@ -23,7 +23,7 @@ Route::prefix('actions/auth')->name('actions.auth.')->group(function () {
         });
         // Authenticated
         Route::middleware(['auth:user'])->group(function () {
-            Route::post('signout', 'signOut')->name('signout-web');
+            Route::post('signout', 'signOut')->name('signout');
         });
     });
 });

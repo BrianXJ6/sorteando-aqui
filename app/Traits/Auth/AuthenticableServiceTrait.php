@@ -3,7 +3,7 @@
 namespace App\Traits\Auth;
 
 use App\Enums\AuthFlow;
-use App\Support\ORM\BaseAuthenticable;
+use App\Data\OutputSignInAuthData;
 use App\Exceptions\ValidationException;
 use App\Data\InputPasswordForgotResetData;
 use App\Data\OutputPasswordForgotResetData;
@@ -16,20 +16,32 @@ trait AuthenticableServiceTrait
      *
      * @param array $credentials
      *
-     * @return \App\Support\ORM\BaseAuthenticable
+     * @return \App\Data\OutputSignInAuthData
      *
      * @throws \App\Exceptions\ValidationException
      */
-    protected function signIn(array $credentials): BaseAuthenticable
+    public function signIn(array $credentials): OutputSignInAuthData
     {
         if (!$this->authManager->attempt($credentials)) {
             throw ValidationException::withMessages([__('auth.failed')]);
         }
 
+        /** @var \App\Support\ORM\BaseAuthenticable */
         $user = $this->authManager->user();
-        $user->forceFill(['last_login' => now()])->save();
+        $user->setLastLogin();
 
-        return $user;
+        if ($this->hasSession()) {
+            $this->sessionRegenerate();
+            $this->confirmPassword();
+        } else {
+            $user->generateApiToken();
+        }
+
+        return OutputSignInAuthData::from([
+            'user' => $user,
+            'flow' => $this->hasSession() ? AuthFlow::WEB : AuthFlow::API,
+            'response' => __('messages.users.signin', ['Name' => $user->name]),
+        ]);
     }
 
     /**

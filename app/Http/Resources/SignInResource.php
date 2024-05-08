@@ -4,9 +4,10 @@ namespace App\Http\Resources;
 
 use App\Enums\AuthFlow;
 use Illuminate\Http\Request;
+use App\Data\OutputSignInAuthData;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class PasswordForgotResetResource extends JsonResource
+class SignInResource extends JsonResource
 {
     /**
      * Route where the user will be redirected if the flow is via WEB
@@ -14,6 +15,16 @@ class PasswordForgotResetResource extends JsonResource
      * @var string
      */
     private const ROUTE_NAME = 'home';
+
+    /**
+     * Create a new Sign In Resource instance
+     *
+     * @param \App\Data\OutputSignInAuthData $outputSignInAuthData
+     */
+    public function __construct(private OutputSignInAuthData $outputSignInAuthData)
+    {
+        parent::__construct($this->outputSignInAuthData);
+    }
 
     /**
      * Transform the resource into an array.
@@ -24,7 +35,7 @@ class PasswordForgotResetResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $response = ['message' => trans($this->response)];
+        $response = ['message' => $this->response];
 
         switch ($this->flow) {
             case AuthFlow::WEB:
@@ -40,21 +51,21 @@ class PasswordForgotResetResource extends JsonResource
     }
 
     /**
-     * Return for WEB
+     * Specific return for WEB flow
      *
      * @return array
      */
-    public function webReturn(): array
+    protected function webReturn(): array
     {
-        return ['redirect' => route(self::ROUTE_NAME)];
+        return ['redirect' => redirect()->intended(route(self::ROUTE_NAME))->getTargetUrl()];
     }
 
     /**
-     * Return for API
+     * Specific return for API flow
      *
      * @return \App\Http\Resources\UserAuthResource
      */
-    public function apiReturn(): UserAuthResource
+    protected function apiReturn(): UserAuthResource
     {
         return UserAuthResource::make($this->user);
     }
