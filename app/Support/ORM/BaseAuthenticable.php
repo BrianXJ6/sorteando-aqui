@@ -18,6 +18,26 @@ abstract class BaseAuthenticable extends Authenticable
 
     /*
     |--------------------------------------------------------------------------
+    | Functions
+    |--------------------------------------------------------------------------
+    */
+
+    /**
+     * Generate new token for API access
+     *
+     * @return string
+     */
+    public function generateApiToken(): string
+    {
+        $token = $this->createToken('api')->plainTextToken;
+        $this->tokens()->where('name', 'api')->delete();
+        $this->token = $token;
+
+        return $token;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
     | Notifications
     |--------------------------------------------------------------------------
     */

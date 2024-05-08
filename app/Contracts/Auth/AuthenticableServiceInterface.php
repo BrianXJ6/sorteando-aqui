@@ -29,4 +29,14 @@ interface AuthenticableServiceInterface
      * @return string
      */
     public function processPasswordRecovery(BaseAuthenticable $user, string $token): string;
+
+    /**
+     * Callback to handle password reset request process
+     *
+     * @param \App\Support\ORM\BaseAuthenticable $user
+     * @param string $password
+     *
+     * @return void
+     */
+    public function processPasswordReset(BaseAuthenticable $user, string $password): void;
 }

@@ -18,6 +18,7 @@ Route::prefix('actions/auth')->name('actions.auth.')->group(function () {
             Route::post('signin', 'signInWeb')->name('signin-web');
             Route::prefix('password/forgot')->name('password.forgot')->group(function () {
                 Route::post('request', 'passwordForgotRequest')->name('request');
+                Route::post('reset', 'passwordForgotReset')->name('reset');
             });
         });
         // Authenticated

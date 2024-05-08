@@ -2,8 +2,11 @@
 
 namespace App\Traits\Auth;
 
+use App\Enums\AuthFlow;
 use App\Support\ORM\BaseAuthenticable;
 use App\Exceptions\ValidationException;
+use App\Data\InputPasswordForgotResetData;
+use App\Data\OutputPasswordForgotResetData;
 use Illuminate\Contracts\Auth\PasswordBroker;
 
 trait AuthenticableServiceTrait
@@ -91,5 +94,33 @@ trait AuthenticableServiceTrait
         );
 
         return $response;
+    }
+
+    /**
+     * Handle common reset forgot password process for any type of authenticable user
+     *
+     * @param \App\Data\InputPasswordForgotResetData $dto
+     *
+     * @return \App\Data\OutputPasswordForgotResetData
+     *
+     * @throws \App\Exceptions\ValidationException
+     */
+    public function resetForgotPassword(InputPasswordForgotResetData $dto): OutputPasswordForgotResetData
+    {
+        $response = $this->passwordManager->broker()->reset(
+            $dto->toArray(),
+            fn ($user, $password) => $this->processPasswordReset($user, $password),
+        );
+
+        throw_if(
+            ($response !== PasswordBroker::PASSWORD_RESET),
+            ValidationException::withMessages([trans($response)])
+        );
+
+        return OutputPasswordForgotResetData::from([
+            'user' => $this->authManager->user(),
+            'flow' => $this->hasSession() ? AuthFlow::WEB : AuthFlow::API,
+            'response' => $response,
+        ]);
     }
 }

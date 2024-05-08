@@ -63,8 +63,7 @@ class UserAuthService implements AuthenticableServiceInterface
     {
         /** @var \App\Models\User */
         $user = $this->signIn($dto->credentials());
-        $user->tokens()->where('name', 'api')->delete();
-        $user->token = $user->createToken('api')->plainTextToken;
+        $user->generateApiToken();
 
         return $user;
     }
@@ -102,5 +101,28 @@ class UserAuthService implements AuthenticableServiceInterface
         $user->sendPasswordResetNotification($token);
 
         return PasswordBroker::RESET_LINK_SENT;
+    }
+
+    /**
+     * Callback to handle password reset request process
+     *
+     * @param \App\Support\ORM\BaseAuthenticable $user
+     * @param string $password
+     *
+     * @return void
+     */
+    public function processPasswordReset(BaseAuthenticable $user, string $password): void
+    {
+        $user->password = $password;
+        $user->save();
+
+        if ($this->hasSession()) {
+            $this->sessionRegenerate();
+            $this->confirmPassword();
+        } else {
+            $user->generateApiToken();
+        }
+
+        $this->authManager->login($user);
     }
 }
