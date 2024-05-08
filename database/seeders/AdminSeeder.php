@@ -18,10 +18,10 @@ class AdminSeeder extends Seeder
         Admin::factory()->createOne([
             'name' => 'Brian Barros',
             'email' => 'admin.master@sorteandoaqui.com.br',
-            'password' => '123456',
+            'password' => '1234567890',
         ]);
 
         // Admins fake
-        Admin::factory()->count(3)->create();
+        Admin::factory()->count(4)->create();
     }
 }
