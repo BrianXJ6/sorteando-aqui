@@ -15,6 +15,10 @@ Route::name('api.')->group(function () {
             // Guest
             Route::middleware(['guest:sanctum'])->group(function () {
                 Route::post('signin', 'signInApi')->name('signin-api');
+                Route::prefix('password/forgot')->name('password.forgot')->group(function () {
+                    Route::post('request', 'passwordForgotRequest')->name('request');
+                    Route::post('reset', 'passwordForgotReset')->name('reset');
+                });
             });
             // Authenticated
             Route::middleware(['auth:sanctum'])->group(function () {
