@@ -29,11 +29,10 @@ abstract class BaseAuthenticable extends Authenticable
      */
     public function generateApiToken(): string
     {
-        $token = $this->createToken('api')->plainTextToken;
         $this->tokens()->where('name', 'api')->delete();
-        $this->token = $token;
+        $this->token = $this->createToken('api')->plainTextToken;
 
-        return $token;
+        return $this->token;
     }
 
     /*
