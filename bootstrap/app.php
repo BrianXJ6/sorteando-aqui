@@ -4,6 +4,7 @@ use Illuminate\Http\JsonResponse;
 use App\Http\Middleware\Authenticate;
 use Illuminate\Foundation\Application;
 use App\Exceptions\ValidationException;
+use App\Http\Middleware\RedirectIfAuthenticated;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 
@@ -24,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Customs middlewares
         $middleware->alias([
             'auth' => Authenticate::class,
+            'guest' => RedirectIfAuthenticated::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
