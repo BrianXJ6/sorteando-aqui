@@ -185,6 +185,44 @@ class UserAuthControllerTest extends TestCase
     }
 
     /**
+     * Test API flow to request link to reset password
+     *
+     * @return void
+     */
+    public function testEndpointViaApiToPasswordForgotRequest(): void
+    {
+        Notification::fake();
+        $route = route('api.auth.users.password.forgot.request');
+        $user = $this->user();
+
+        $this->postJson($route)
+            ->assertUnprocessable()
+            ->assertJsonIsObject()
+            ->assertJsonStructure(['message', 'errors' => ['email']])
+            ->assertJson(fn (AssertableJson $json) => $json->whereAllType([
+                'message' => 'string',
+                'errors.email' => 'array',
+            ]));
+
+        $this->postJson($route, ['email' => $user->email])
+            ->assertJsonIsObject()
+            ->assertJsonStructure(['message'])
+            ->assertJson(fn (AssertableJson $json) => $json->whereType('message', 'string'))
+            ->assertSuccessful();
+        Notification::assertSentTo($user, ResetPasswordNotification::class);
+
+        // many attempts
+        $this->postJson($route, ['email' => $user->email])
+            ->assertUnprocessable()
+            ->assertJsonIsObject()
+            ->assertJsonStructure(['message'])
+            ->assertJson(fn (AssertableJson $json) => $json->whereType('message', 'string'));
+
+        Sanctum::actingAs($this->user());
+        $this->postJson($route)->assertRedirect();
+    }
+
+    /**
      * Endpoint via API to log out a user
      *
      * @return void
