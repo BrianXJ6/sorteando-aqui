@@ -9,6 +9,8 @@ use Illuminate\Testing\Fluent\AssertableJson;
 
 class UserAuthControllerTest extends TestCase
 {
+    public const FAKE_PASS = '1234567890';
+
     /**
      * Testing the WEB Sing in endpoint for users
      *
@@ -26,7 +28,7 @@ class UserAuthControllerTest extends TestCase
         $this->post($route, [
                 'option' => UserLoginOption::EMAIL->value,
                 'login' => $user->email,
-                'password' => '1234567890',
+                'password' => self::FAKE_PASS,
             ])
             ->assertJson(fn (AssertableJson $json) => $json->whereAllType([
                 'redirect' => 'string',
@@ -75,7 +77,7 @@ class UserAuthControllerTest extends TestCase
         $this->postJson($route, [
                 'option' => UserLoginOption::EMAIL->value,
                 'login' => $user->email,
-                'password' => '1234567890',
+                'password' => self::FAKE_PASS,
             ])
             ->assertJsonIsObject()
             ->assertJsonStructure(['user', 'token', 'message'])
