@@ -223,6 +223,72 @@ class UserAuthControllerTest extends TestCase
     }
 
     /**
+     * Test API flow to reset password by requested link to reset password
+     *
+     * @return void
+     */
+    public function testEndpointViaApiToPasswordForgotReset(): void
+    {
+        $route = route('api.auth.users.password.forgot.reset');
+        $user = $this->user();
+        $fakeToken = '##########';
+        $data = [
+            'token' => $fakeToken,
+            'email' => $user->email,
+            'password' => self::FAKE_PASS,
+            'password_confirmation' => self::FAKE_PASS,
+        ];
+
+        $this->postJson($route)
+            ->assertUnprocessable()
+            ->assertJsonIsObject()
+            ->assertJsonStructure(['message', 'errors' => ['token', 'email', 'password']])
+            ->assertJson(fn (AssertableJson $json) => $json->whereAllType([
+                'message' => 'string',
+                'errors.token' => 'array',
+                'errors.email' => 'array',
+                'errors.password' => 'array',
+            ]));
+
+        $this->postJson($route, array_merge($data, ['password' => self::FAKE_PASS . $fakeToken]))
+            ->assertUnprocessable()
+            ->assertJsonIsObject()
+            ->assertJsonStructure(['message', 'errors' => ['password']])
+            ->assertJson(fn (AssertableJson $json) => $json->whereAllType([
+                'message' => 'string',
+                'errors.password' => 'array',
+            ]));
+
+        $this->postJson($route, $data)
+            ->assertUnprocessable()
+            ->assertJsonIsObject()
+            ->assertJsonStructure(['message']);
+
+        $newPassword = '@FakePass123';
+        $newToken = Password::createToken($user);
+        $this->postJson($route, array_merge($data, [
+                'token' => $newToken,
+                'password' => $newPassword,
+                'password_confirmation' => $newPassword,
+            ]))
+            ->assertSuccessful()
+            ->assertJsonIsObject()
+            ->assertJsonStructure(['user', 'token', 'message'])
+            ->assertJson(fn (AssertableJson $json) => $json->whereAllType([
+                'user.id' => 'integer',
+                'user.name' => 'string',
+                'user.email' => 'string',
+                'user.avatar' => 'null|string',
+                'user.email_verified_at' => 'string|datetime',
+                'user.last_login' => 'string|datetime',
+                'token' => 'null|string',
+                'message' => 'string',
+            ]));
+
+        $this->assertTrue(Hash::check($newPassword, User::find($user->id)->password));
+    }
+
+    /**
      * Endpoint via API to log out a user
      *
      * @return void
