@@ -16,7 +16,7 @@ Route::prefix('actions/auth')->name('actions.auth.')->group(function () {
         // Guest
         Route::middleware(['guest:user'])->group(function () {
             Route::post('signin', 'signIn')->name('signin');
-            Route::prefix('password/forgot')->name('password.forgot')->group(function () {
+            Route::prefix('password/forgot')->name('password.forgot.')->group(function () {
                 Route::post('request', 'passwordForgotRequest')->name('request');
                 Route::post('reset', 'passwordForgotReset')->name('reset');
             });
