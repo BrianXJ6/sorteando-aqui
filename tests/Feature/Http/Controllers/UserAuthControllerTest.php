@@ -5,7 +5,9 @@ namespace Tests\Feature\Http\Controllers;
 use Tests\TestCase;
 use Laravel\Sanctum\Sanctum;
 use App\Enums\UserLoginOption;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Testing\Fluent\AssertableJson;
+use App\Notifications\ResetPasswordNotification;
 
 class UserAuthControllerTest extends TestCase
 {
@@ -37,6 +39,39 @@ class UserAuthControllerTest extends TestCase
             ->assertJsonStructure(['redirect', 'message'])
             ->assertSuccessful();
 
+
+        $this->actingAs($user, 'user')
+            ->post($route)
+            ->assertRedirect();
+    }
+
+    /**
+     * Test web flow to request link to reset password
+     *
+     * @return void
+     */
+    public function testWebActionsToPasswordForgotRequest(): void
+    {
+        Notification::fake();
+        $route = route('actions.auth.users.password.forgot.request');
+        $user = $this->user();
+
+        $this->post($route)
+            ->assertRedirect()
+            ->assertSessionHasErrors(['email']);
+
+        $this->post($route, ['email' => $user->email])
+            ->assertJsonIsObject()
+            ->assertJsonStructure(['message'])
+            ->assertJson(fn (AssertableJson $json) => $json->whereType('message', 'string'))
+            ->assertSuccessful();
+        Notification::assertSentTo($user, ResetPasswordNotification::class);
+
+        // many attempts
+        $this->post($route, ['email' => $user->email])
+            ->assertJsonIsObject()
+            ->assertUnprocessable()
+            ->assertJsonStructure(['message']);
 
         $this->actingAs($user, 'user')
             ->post($route)
