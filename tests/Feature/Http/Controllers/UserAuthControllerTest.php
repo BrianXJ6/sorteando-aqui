@@ -3,8 +3,11 @@
 namespace Tests\Feature\Http\Controllers;
 
 use Tests\TestCase;
+use App\Models\User;
 use Laravel\Sanctum\Sanctum;
 use App\Enums\UserLoginOption;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Testing\Fluent\AssertableJson;
 use App\Notifications\ResetPasswordNotification;
@@ -76,6 +79,54 @@ class UserAuthControllerTest extends TestCase
         $this->actingAs($user, 'user')
             ->post($route)
             ->assertRedirect();
+    }
+
+    /**
+     * Test web flow to reset password by requested link to reset password
+     *
+     * @return void
+     */
+    public function testWebActionsToPasswordForgotReset(): void
+    {
+        $route = route('actions.auth.users.password.forgot.reset');
+        $user = $this->user();
+        $fakeToken = '##########';
+        $data = [
+            'token' => $fakeToken,
+            'email' => $user->email,
+            'password' => self::FAKE_PASS,
+            'password_confirmation' => self::FAKE_PASS,
+        ];
+
+        $this->post($route)
+            ->assertRedirect()
+            ->assertSessionHasErrors(['token', 'email', 'password']);
+
+        $this->post($route, array_merge($data, ['password' => self::FAKE_PASS . $fakeToken]))
+            ->assertRedirect()
+            ->assertSessionHasErrors(['password']);
+
+        $this->post($route, $data)
+            ->assertJsonIsObject()
+            ->assertUnprocessable()
+            ->assertJsonStructure(['message']);
+
+        $newPassword = '@FakePass123';
+        $newToken = Password::createToken($user);
+        $this->post($route, array_merge($data, [
+                'token' => $newToken,
+                'password' => $newPassword,
+                'password_confirmation' => $newPassword,
+            ]))
+            ->assertJsonIsObject()
+            ->assertJsonStructure(['redirect', 'message'])
+            ->assertJson(fn (AssertableJson $json) => $json->whereAllType([
+                'redirect' => ['string'],
+                'message' => ['string'],
+            ]))
+            ->assertSuccessful();
+
+        $this->assertTrue(Hash::check($newPassword, User::find($user->id)->password));
     }
 
     /**
