@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\JsonResponse;
+use App\Http\Middleware\Authenticate;
 use Illuminate\Foundation\Application;
 use App\Exceptions\ValidationException;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -19,6 +20,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->throttleWithRedis();
         $middleware->web('throttle:web');
         $middleware->api('throttle:api');
+
+        // Customs middlewares
+        $middleware->alias([
+            'auth' => Authenticate::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (ValidationException $e) {
