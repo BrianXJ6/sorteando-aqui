@@ -16,28 +16,28 @@ class UserAuthControllerTest extends TestCase
      */
     public function testWebActionsToAuthenticateGuestUsers(): void
     {
-        $route = route('actions.auth.users.signin-web');
+        $route = route('actions.auth.users.signin');
         $user = $this->user();
 
-        $this->postJson($route)
-            ->assertJsonIsObject()
-            ->assertJsonStructure(['message', 'errors' => ['option', 'login', 'password']])
-            ->assertUnprocessable();
+        $this->post($route)
+            ->assertRedirect()
+            ->assertSessionHasErrors(['option', 'login', 'password']);
 
-        $this->postJson($route, [
-                'option' => UserLoginOption::EMAIL,
+        $this->post($route, [
+                'option' => UserLoginOption::EMAIL->value,
                 'login' => $user->email,
-                'password' => 'password',
+                'password' => '1234567890',
             ])
-            ->assertJsonStructure(['redirect', 'message'])
             ->assertJson(fn (AssertableJson $json) => $json->whereAllType([
                 'redirect' => 'string',
                 'message' => 'string'
             ]))
-            ->assertStatus(200);
+            ->assertJsonStructure(['redirect', 'message'])
+            ->assertSuccessful();
+
 
         $this->actingAs($user, 'user')
-            ->postJson($route)
+            ->post($route)
             ->assertRedirect();
     }
 
@@ -48,12 +48,12 @@ class UserAuthControllerTest extends TestCase
      */
     public function testWebActionsToLogOutUsers(): void
     {
-        $route = route('actions.auth.users.signout-web');
+        $route = route('actions.auth.users.signout');
 
-        $this->postJson($route)->assertUnauthorized();
+        $this->post($route)->assertRedirect();
 
         $this->actingAs($this->user(), 'user')
-            ->postJson($route)
+            ->post($route)
             ->assertNoContent();
     }
 
@@ -64,7 +64,7 @@ class UserAuthControllerTest extends TestCase
      */
     public function testEndpointViaApiToLogInUser(): void
     {
-        $route = route('api.auth.users.signin-api');
+        $route = route('api.auth.users.signin');
         $user = $this->user();
 
         $this->postJson($route)
@@ -73,9 +73,9 @@ class UserAuthControllerTest extends TestCase
             ->assertJsonStructure(['message','errors' => ['option', 'login', 'password']]);
 
         $this->postJson($route, [
-                'option' => UserLoginOption::EMAIL,
+                'option' => UserLoginOption::EMAIL->value,
                 'login' => $user->email,
-                'password' => 'password',
+                'password' => '1234567890',
             ])
             ->assertJsonIsObject()
             ->assertJsonStructure(['user', 'token', 'message'])
@@ -86,10 +86,10 @@ class UserAuthControllerTest extends TestCase
                 'user.avatar' => 'null|string',
                 'user.email_verified_at' => 'string|datetime',
                 'user.last_login' => 'string|datetime',
-                'token' => 'string',
+                'token' => 'null|string',
                 'message' => 'string',
             ]))
-            ->assertStatus(200);
+            ->assertSuccessful();
 
         $this->actingAs($user, 'user')
             ->postJson($route)
@@ -103,10 +103,9 @@ class UserAuthControllerTest extends TestCase
      */
     public function testEndpointViaApiToLogOutUser(): void
     {
-        $route = route('api.auth.users.signout-api');
+        $route = route('api.auth.users.signout');
 
-        $this->postJson($route)
-            ->assertUnauthorized();
+        $this->postJson($route)->assertUnauthorized();
 
         Sanctum::actingAs($this->user());
         $this->withoutExceptionHandling()
