@@ -76,6 +76,7 @@ class UserAuthService implements AuthenticableServiceInterface
     public function processPasswordReset(BaseAuthenticable $user, string $password): void
     {
         $user->password = $password;
+        $user->setLastLogin(false);
         $user->save();
 
         if ($this->hasSession()) {
