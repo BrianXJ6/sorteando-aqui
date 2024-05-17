@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\UserLoginFlow;
 use App\Services\UserAuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
-use App\Http\Resources\UserAuthResource;
+use App\Http\Resources\SignInResource;
+use App\Http\Requests\PasswordForgotRequest;
 use App\Http\Requests\SignInAuthUserRequest;
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Requests\PasswordForgotResetRequest;
+use App\Http\Resources\PasswordForgotResetResource;
 
 class UserAuthController extends Controller
 {
@@ -23,35 +25,21 @@ class UserAuthController extends Controller
     }
 
     /**
-     * Login flow from the WEB
+     * Login flow
      *
      * @param \App\Http\Requests\SignInAuthUserRequest $request
      *
      * @return \Illuminate\Http\Resources\Json\JsonResource
      */
-    public function signInWeb(SignInAuthUserRequest $request): JsonResource
+    public function signIn(SignInAuthUserRequest $request): JsonResource
     {
-        $user = DB::transaction(fn () => $this->userAuthService->signInWeb($request->getDTO()));
+        $outputSignInDTO = DB::transaction(fn () => $this->userAuthService->signIn($request->getDTO()->credentials()));
 
-        return UserAuthResource::make(['user' => $user, 'flow' => UserLoginFlow::WEB]);
+        return SignInResource::make($outputSignInDTO);
     }
 
     /**
-     * Login flow from the API
-     *
-     * @param \App\Http\Requests\SignInAuthUserRequest $request
-     *
-     * @return \Illuminate\Http\Resources\Json\JsonResource
-     */
-    public function signInApi(SignInAuthUserRequest $request): JsonResource
-    {
-        $user = DB::transaction(fn () => $this->userAuthService->signInApi($request->getDTO()));
-
-        return UserAuthResource::make(['user' => $user, 'flow' => UserLoginFlow::API]);
-    }
-
-    /**
-     * Logout flow from the WEB
+     * Logout flow
      *
      * @return JsonResponse
      */
@@ -60,5 +48,33 @@ class UserAuthController extends Controller
         $this->userAuthService->signOut();
 
         return new JsonResponse(status:JsonResponse::HTTP_NO_CONTENT);
+    }
+
+    /**
+     * First step to password recovery (Request link)
+     *
+     * @param \App\Http\Requests\PasswordForgotRequest $request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function passwordForgotRequest(PasswordForgotRequest $request): JsonResponse
+    {
+        $response = DB::transaction(fn () => $this->userAuthService->requestPasswordRecovery($request->only('email')));
+
+        return new JsonResponse(['message' => trans($response)]);
+    }
+
+    /**
+     * Last step to password recovery (reset password)
+     *
+     * @param \App\Http\Requests\PasswordForgotResetRequest $request
+     *
+     * @return \Illuminate\Http\Resources\Json\JsonResource
+     */
+    public function passwordForgotReset(PasswordForgotResetRequest $request): JsonResource
+    {
+        $dto = DB::transaction(fn () => $this->userAuthService->resetForgotPassword($request->getDTO()));
+
+        return PasswordForgotResetResource::make($dto);
     }
 }

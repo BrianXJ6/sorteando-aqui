@@ -18,11 +18,11 @@ class UserSeeder extends Seeder
         User::factory()->create([
             'name' => 'Brian Ferreira',
             'email' => 'brianferreira15@hotmail.com',
-            'password' => '123456',
+            'password' => '1234567890',
         ]);
 
         // Creating user sequences by toggling values for `email_verified_at`
-        User::factory()->count(10)->sequence(
+        User::factory()->count(9)->sequence(
             ['email_verified_at' => now()],
             ['email_verified_at' => null],
         )->create();

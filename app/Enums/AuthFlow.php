@@ -4,10 +4,10 @@ namespace App\Enums;
 
 use App\Traits\Enums\EnumFunctions;
 
-enum UserLoginFlow: string
+enum AuthFlow: string
 {
     use EnumFunctions;
 
-    case WEB = 'email';
-    case API = 'phone';
+    case WEB = 'web';
+    case API = 'api';
 }
