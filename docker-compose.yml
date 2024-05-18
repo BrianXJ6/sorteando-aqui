@@ -1,22 +1,25 @@
 services:
     app:
-        container_name: '${APP_SERVICE}'
+        container_name: "${APP_SERVICE}"
         build:
-            context: ./vendor/laravel/sail/runtimes/8.3
+            context: ./docker/app
             dockerfile: Dockerfile
             args:
-                WWWGROUP: '${WWWGROUP}'
+                WWWGROUP: "${WWWGROUP:-1000}"
         image: sorteando-aqui-app
         extra_hosts:
-            - 'host.docker.internal:host-gateway'
+            - "host.docker.internal:host-gateway"
         ports:
-            - '${APP_PORT:-80}:80'
-            - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
+            - "${APP_PORT:-80}:80"
+            - "${VITE_PORT:-5173}:${VITE_PORT:-5173}"
         environment:
-            XDEBUG_MODE: '${XDEBUG_MODE:-off}'
-            SUPERVISOR_PHP_COMMAND: "/usr/bin/php -d variables_order=EGPCS /var/www/html/artisan octane:start --watch --server=swoole --host=0.0.0.0 --port=80"
+            WWWUSER: "${WWWUSER:-1000}"
+            LARAVEL_SAIL: 1
+            IGNITION_LOCAL_SITES_PATH: "${PWD}"
+            XDEBUG_MODE: "${SAIL_XDEBUG_MODE:-off}"
+            XDEBUG_CONFIG: "${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}"
         volumes:
-            - '.:/var/www/html'
+            - ".:/var/www/html"
         networks:
             - private
         depends_on:
@@ -25,18 +28,18 @@ services:
 
     mysql:
         container_name: mysql
-        image: 'mysql/mysql-server:8.0'
+        image: "mysql/mysql-server:8.0"
         ports:
-            - '${DB_PORT:-3306}:3306'
+            - "${DB_PORT:-3306}:3306"
         environment:
-            MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
-            MYSQL_ROOT_HOST: '%'
-            MYSQL_DATABASE: '${DB_DATABASE}'
-            MYSQL_USER: '${DB_USERNAME}'
-            MYSQL_PASSWORD: '${DB_PASSWORD}'
+            MYSQL_ROOT_PASSWORD: "${DB_PASSWORD}"
+            MYSQL_ROOT_HOST: "%"
+            MYSQL_DATABASE: "${DB_DATABASE}"
+            MYSQL_USER: "${DB_USERNAME}"
+            MYSQL_PASSWORD: "${DB_PASSWORD}"
         volumes:
-            - 'mysql:/var/lib/mysql'
-            - './vendor/laravel/sail/database/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
+            - "mysql:/var/lib/mysql"
+            - "./docker/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh"
         networks:
             - private
         healthcheck:
@@ -44,17 +47,17 @@ services:
                 - CMD
                 - mysqladmin
                 - ping
-                - '-p${DB_PASSWORD}'
+                - "-p${DB_PASSWORD}"
             retries: 3
             timeout: 5s
 
     redis:
         container_name: redis
-        image: 'redis:alpine'
+        image: "redis:alpine"
         ports:
-            - '${REDIS_PORT:-6379}:6379'
+            - "${REDIS_PORT:-6379}:6379"
         volumes:
-            - 'redis:/data'
+            - "redis:/data"
         networks:
             - private
         healthcheck:
@@ -67,15 +70,15 @@ services:
 
     minio:
         container_name: minio
-        image: 'minio/minio:latest'
+        image: "minio/minio:latest"
         ports:
-            - '${FORWARD_MINIO_PORT:-9000}:9000'
-            - '${FORWARD_MINIO_CONSOLE_PORT:-8900}:8900'
+            - "${FORWARD_MINIO_PORT:-9000}:9000"
+            - "${FORWARD_MINIO_CONSOLE_PORT:-8900}:8900"
         environment:
             MINIO_ROOT_USER: sail
             MINIO_ROOT_PASSWORD: password
         volumes:
-            - 'minio:/data/minio'
+            - "minio:/data/minio"
         networks:
             - private
         command: 'minio server /data/minio --console-address ":8900"'
@@ -83,8 +86,8 @@ services:
             test:
                 - CMD
                 - curl
-                - '-f'
-                - 'http://localhost:9000/minio/health/live'
+                - "-f"
+                - "http://localhost:9000/minio/health/live"
             retries: 3
             timeout: 5s
 
